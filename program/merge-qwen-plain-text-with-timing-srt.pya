@@ -1,0 +1,18 @@
+ob ve filename text audio filename text timing srt filename text plain text filename text merged srt filename be input ya
+
+exists su name hear backend default ob text "qwen" be default ya
+
+from filename of ob of audio filename to name text plain transcript be hear do
+ob name text plain transcript to filename of ob of plain text filename be write do
+
+ob text "node /home/htaf/pyac/pyash/command/lyrics_to_srt_from_timing.mjs \"" to name text merge cmd be text do
+ob text of ob of plain text filename to name merge cmd be plus do
+ob text "\" \"" to name merge cmd be plus do
+ob text of ob of timing srt filename to name merge cmd be plus do
+ob text "\" \"" to name merge cmd be plus do
+ob text of ob of merged srt filename to name merge cmd be plus do
+ob text "\"" to name merge cmd be plus do
+
+ob name text merge cmd to name text merge result be command do
+ob name merge result be write do
+ob text of ob of merged srt filename be write do

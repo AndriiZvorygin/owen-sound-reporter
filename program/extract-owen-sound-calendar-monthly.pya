@@ -1,0 +1,2 @@
+ob text "node /home/htaf/pyac/pyash/world/house/owen-sound-reporter/program/extract-owen-sound-calendar-monthly.mjs" to name text extract summary be command do
+ob name extract summary be write do

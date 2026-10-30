@@ -1,0 +1,9 @@
+from filename "/home/htaf/pyac/pyash/module/module_manuscript_scored.pya" ob name manuscript as wo module to name manuscript as wo module be import do
+
+ob filename text source be input ya
+su name provider auto discharge ob bool lie ya
+
+exists su name news civic hook hint ob text quoted.text.Write this as a factual local civic-news preview script about agenda items under consideration. Keep it plain and concrete. Do not imply approvals are final. Front-load what residents should watch and why it matters..text.quoted be default ya
+
+su name manuscript stage from filename of ob of source with text of ob of news civic hook hint to name text result be manuscript as wo module do
+su name manuscript out ob name text result be write do

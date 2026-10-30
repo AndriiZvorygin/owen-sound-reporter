@@ -1,0 +1,5 @@
+exists su name hear backend default ob text "qwen" be default ya
+exists su name hear qwen chunk max seconds ob num 30 be default ya
+exists su name hear qwen chunk overlap seconds ob num 1.5 be default ya
+
+from filename "/home/htaf/pyac/pyash/world/house/owen-sound-reporter/artifacts/owen-sound/meetings/2026-03-23_council-meeting-regular_f3b0c55c/transcript/meeting-audio.opus" become wo srt to filename "/home/htaf/pyac/pyash/world/house/owen-sound-reporter/artifacts/owen-sound/meetings/2026-03-23_council-meeting-regular_f3b0c55c/transcript/meeting-qwen-30s.srt" be hear do

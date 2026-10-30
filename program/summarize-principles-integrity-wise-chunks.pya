@@ -1,0 +1,45 @@
+from filename "/home/htaf/pyac/pyash/module/chip_refinery.pya" to name chip as wo module be import do
+from filename "/home/htaf/pyac/pyash/module/module_manuscript_scored.pya" ob name manuscript as wo module to name manuscript as wo module be import do
+
+su name provider auto discharge ob bool lie ya
+
+exists su name source filename ob filename "/home/htaf/pyac/pyash/world/house/owen-sound-reporter/artifacts/owen-sound/meetings/2026-03-23_council-meeting-regular_f3b0c55c/converted/subreports/7-a_deputation-from-karen-kelly-principles-integrity-re-integrity-commissioner-s-rep.md" be text ya
+exists su name output directory ob filename "/home/htaf/pyac/pyash/world/house/owen-sound-reporter/artifacts/owen-sound/meetings/2026-03-23_council-meeting-regular_f3b0c55c/converted/subreports/summaries/7-a" be text ya
+exists su name wise chunks filename ob filename "/home/htaf/pyac/pyash/world/house/owen-sound-reporter/artifacts/owen-sound/meetings/2026-03-23_council-meeting-regular_f3b0c55c/converted/subreports/summaries/7-a/wise-chunks.series.pya" be text ya
+exists su name abridged wise chunks filename ob filename "/home/htaf/pyac/pyash/world/house/owen-sound-reporter/artifacts/owen-sound/meetings/2026-03-23_council-meeting-regular_f3b0c55c/converted/subreports/summaries/7-a/wise-chunks.abridged.series.pya" be text ya
+exists su name wise chunk summaries filename ob filename "/home/htaf/pyac/pyash/world/house/owen-sound-reporter/artifacts/owen-sound/meetings/2026-03-23_council-meeting-regular_f3b0c55c/converted/subreports/summaries/7-a/wise-chunks.summary.series.pya" be text ya
+
+exists su name chunk style prompt ob text quoted.text.Split this municipal subreport into wise chunks that preserve complete topical sections. Prefer heading boundaries, then paragraph boundaries. Avoid tiny fragments. Keep each chunk coherent for civic summarization..text.quoted be text ya
+
+exists su name chunk summary hook hint ob text quoted.text.Summarize this civic report chunk faithfully. Keep only concrete facts grounded in the chunk. Mention who/what/why only when stated. No speculation. Plain language. Compact local-news briefing tone..text.quoted be text ya
+
+su name chunk abridge mapper ob text chunk fromindex num 0 be ceremony def
+  from text of ob of this atmost byte 6000 to name text chunk abridged be abridge do
+  su name chunk abridged ret
+prah
+
+su name chunk summary mapper ob text chunk fromindex num 0 be ceremony def
+  su name chunk summary stage from text of ob of this with text of ob of chunk summary hook hint to name text chunk summary be manuscript as wo module do
+  from name text chunk summary atmost byte 6000 to name text chunk summary compact be abridge do
+  su name chunk summary compact ret
+prah
+
+su name summarize principles integrity wise chunks be refinery def
+  be directory ob filename of ob of output directory do
+
+  su name source stage from filename of ob of source filename become wo text to name text source text be read do
+  su name wise chunk stage from name text source text ob text of ob of chunk style prompt to name series wise chunks be chip do
+  su name abridge wise chunks stage from name wise chunks by name chunk abridge mapper to name text abridged wise chunks be series map do
+  su name summarize wise chunks stage from name abridged wise chunks by name chunk summary mapper to name text wise chunk summaries be series map do
+
+  ob name wise chunks to filename of ob of wise chunks filename be write do
+
+  ob name abridged wise chunks to filename of ob of abridged wise chunks filename be write do
+
+  ob name wise chunk summaries to filename of ob of wise chunk summaries filename be write do
+
+  ob text of ob of wise chunk summaries filename be write do
+prah
+
+from name summarize principles integrity wise chunks to name text summary output path be refinery do
+ob name summary output path be write do

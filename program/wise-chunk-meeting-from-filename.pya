@@ -1,0 +1,11 @@
+ob filename text source be input ya
+ob filename text output be input ya
+
+from filename of ob of source become wo text to name text source text be read do
+
+exists su name meeting chunk style prompt ob text quoted.text.Split this municipal meeting transcript into coherent wise chips by meeting boundaries and agenda shifts. Prefer boundaries around call to order, disclosures, deputations, reports, motions, votes, by-laws, question periods, notices, and adjournment. Keep each chip topically complete. Avoid tiny fragments unless needed for a distinct vote or resolution..text.quoted be text ya
+
+from name text source text ob name meeting chunk style prompt to name series meeting wise chips be chip llm do
+
+ob name meeting wise chips to filename of ob of output be write do
+ob text of ob of output be write do

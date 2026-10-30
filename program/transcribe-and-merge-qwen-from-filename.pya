@@ -1,0 +1,17 @@
+ob filename text audio be input ya
+ob filename text outdir be input ya
+ob text text prefix be input ya
+
+ob name audio to name text audio path be text do
+ob name outdir to name text outdir path be text do
+
+ob text "PYA_COMMAND_TIMEOUT_MS=7200000 node /home/htaf/pyac/pyash/world/house/owen-sound-reporter/program/transcribe-and-merge-qwen-from-filename.mjs \"" to name text cmd be text do
+ob name text audio path to name cmd be plus do
+ob text "\" \"" to name cmd be plus do
+ob name text outdir path to name cmd be plus do
+ob text "\" \"" to name cmd be plus do
+ob name text prefix to name cmd be plus do
+ob text "\"" to name cmd be plus do
+
+ob text of ob of cmd to name text out be command do
+ob name out be write do

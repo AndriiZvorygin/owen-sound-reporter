@@ -1,0 +1,13 @@
+su name hear backend default ob text "qwen" ya
+
+exists su name audio filename ob filename "/home/htaf/pyac/pyash/world/house/owen-sound-reporter/artifacts/owen-sound/meetings/2026-03-23_council-meeting-regular_f3b0c55c/transcript/meeting-audio.opus" be filename ya
+exists su name timing srt filename ob filename "/home/htaf/pyac/pyash/world/house/owen-sound-reporter/artifacts/owen-sound/meetings/2026-03-23_council-meeting-regular_f3b0c55c/transcript/meeting-qwen-30s.srt" be filename ya
+exists su name plain text filename ob filename "/home/htaf/pyac/pyash/world/house/owen-sound-reporter/artifacts/owen-sound/meetings/2026-03-23_council-meeting-regular_f3b0c55c/transcript/meeting-qwen-plain.txt" be filename ya
+exists su name merged srt filename ob filename "/home/htaf/pyac/pyash/world/house/owen-sound-reporter/artifacts/owen-sound/meetings/2026-03-23_council-meeting-regular_f3b0c55c/transcript/meeting-qwen-merged-sentences.srt" be filename ya
+
+from filename of ob of audio filename to name text plain transcript be hear do
+ob name text plain transcript to filename of ob of plain text filename be write do
+
+ob text "node /home/htaf/pyac/pyash/command/lyrics_to_srt_from_timing.mjs \"/home/htaf/pyac/pyash/world/house/owen-sound-reporter/artifacts/owen-sound/meetings/2026-03-23_council-meeting-regular_f3b0c55c/transcript/meeting-qwen-plain.txt\" \"/home/htaf/pyac/pyash/world/house/owen-sound-reporter/artifacts/owen-sound/meetings/2026-03-23_council-meeting-regular_f3b0c55c/transcript/meeting-qwen-30s.srt\" \"/home/htaf/pyac/pyash/world/house/owen-sound-reporter/artifacts/owen-sound/meetings/2026-03-23_council-meeting-regular_f3b0c55c/transcript/meeting-qwen-merged-sentences.srt\"" to name text merge result be command do
+ob name merge result be write do
+ob text of ob of merged srt filename be write do

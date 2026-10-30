@@ -1,0 +1,12 @@
+# Format:
+# canonical<TAB>alias1|alias2|alias3
+# or:
+# canonical => alias1|alias2
+
+OSHaRE	Oshor|Osher|Oshare|OSHARE
+Owen Sound	Oceansound|Ocean Sound|Onsound|Onondaga
+City of Owen Sound	City of Oceansound
+Scott Greig	Scott Greg|Scott Gregg|Deputy Mayor Greg|Deputy Mayor Gregg
+Andrii Zvorygin	Andre Zvorogin|Andrei Zvorov|Andrei Zvorygin|Andrii Zvorov
+Grey Sauble	Grey Sable
+M'Wikwedong	Moquehadong|Malwiquadong

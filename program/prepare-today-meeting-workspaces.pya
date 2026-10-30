@@ -1,0 +1,2 @@
+ob text "node /home/htaf/pyac/pyash/world/house/owen-sound-reporter/program/prepare-today-meeting-workspaces.mjs" to name text prep summary be command do
+ob name prep summary be write do

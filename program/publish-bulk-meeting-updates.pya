@@ -1,0 +1,15 @@
+exists su name meetings_dir ob text "artifacts/owen-sound/meetings" be default ya
+exists su name match_text ob text "" be default ya
+exists su name dry_run ob text "0" be default ya
+
+ob text "node /home/htaf/pyac/pyash/world/house/owen-sound-reporter/program/publish-bulk-meeting-updates.mjs \"" to name text cmd be text do
+ob name text meetings_dir to name cmd be plus do
+ob text "\" \"" to name cmd be plus do
+ob name text match_text to name cmd be plus do
+ob text "\" \"" to name cmd be plus do
+ob name text dry_run to name cmd be plus do
+ob text "\"" to name cmd be plus do
+
+ob text of ob of cmd to name text out be command do
+ob name out be write do
+

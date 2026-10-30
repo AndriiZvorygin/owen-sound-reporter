@@ -1,0 +1,35 @@
+exists su name output_filename ob text "transcript-page.html" be default ya
+exists su name jurisdiction ob text "Owen Sound" be default ya
+exists su name body ob text "Council" be default ya
+exists su name site_url ob text "https://helpos.ca" be default ya
+exists su name discussion_url ob text "" be default ya
+exists su name source_url ob text "" be default ya
+exists su name video_url ob text "" be default ya
+exists su name hook ob text "" be default ya
+
+ob filename text transcript_dir be input ya
+
+ob name transcript_dir to name text transcript path be text do
+
+ob text "PYA_COMMAND_TIMEOUT_MS=120000 node /home/htaf/pyac/pyash/world/house/owen-sound-reporter/program/render-transcript-html-from-transcript-folder.mjs \"" to name text cmd be text do
+ob name text transcript path to name cmd be plus do
+ob text "\" \"" to name cmd be plus do
+ob name text output_filename to name cmd be plus do
+ob text "\" \"" to name cmd be plus do
+ob name text jurisdiction to name cmd be plus do
+ob text "\" \"" to name cmd be plus do
+ob name text body to name cmd be plus do
+ob text "\" \"" to name cmd be plus do
+ob name text site_url to name cmd be plus do
+ob text "\" \"" to name cmd be plus do
+ob name text discussion_url to name cmd be plus do
+ob text "\" \"" to name cmd be plus do
+ob name text source_url to name cmd be plus do
+ob text "\" \"" to name cmd be plus do
+ob name text video_url to name cmd be plus do
+ob text "\" \"" to name cmd be plus do
+ob name text hook to name cmd be plus do
+ob text "\"" to name cmd be plus do
+
+ob text of ob of cmd to name text out be command do
+ob name out be write do

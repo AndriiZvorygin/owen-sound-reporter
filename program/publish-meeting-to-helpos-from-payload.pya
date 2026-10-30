@@ -1,0 +1,25 @@
+exists su name community_name ob text "owensound" be default ya
+exists su name idempotency_key ob text "" be default ya
+exists su name post_ref ob text "" be default ya
+exists su name extras_json ob text "" be default ya
+exists su name dry_run ob text "1" be default ya
+ob filename text payload_json be input ya
+
+ob name payload_json to name text payload path be text do
+
+ob text "node /home/htaf/pyac/pyash/world/house/owen-sound-reporter/program/publish-meeting-to-helpos-from-payload.mjs \"" to name text cmd be text do
+ob name text payload path to name cmd be plus do
+ob text "\" \"" to name cmd be plus do
+ob name text community_name to name cmd be plus do
+ob text "\" \"" to name cmd be plus do
+ob name text idempotency_key to name cmd be plus do
+ob text "\" \"" to name cmd be plus do
+ob name text post_ref to name cmd be plus do
+ob text "\" \"" to name cmd be plus do
+ob name text extras_json to name cmd be plus do
+ob text "\" \"" to name cmd be plus do
+ob name text dry_run to name cmd be plus do
+ob text "\"" to name cmd be plus do
+
+ob text of ob of cmd to name text out be command do
+ob name out be write do

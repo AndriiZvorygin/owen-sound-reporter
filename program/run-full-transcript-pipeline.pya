@@ -1,0 +1,34 @@
+exists su name base_prefix ob text "meeting-qwen-auto" be default ya
+exists su name focus ob text "" be default ya
+exists su name jurisdiction ob text "Owen Sound" be default ya
+exists su name body ob text "Council" be default ya
+exists su name site_url ob text "https://helpos.ca" be default ya
+exists su name discussion_url ob text "" be default ya
+exists su name skip_image ob text "0" be default ya
+exists su name skip_lemmy ob text "0" be default ya
+ob filename text transcript_dir be input ya
+
+ob name transcript_dir to name text transcript path be text do
+
+ob text "OWEN_PIPELINE_SKIP_IMAGE=" to name text cmd be text do
+ob name text skip_image to name cmd be plus do
+ob text " OWEN_PIPELINE_SKIP_LEMMY=" to name cmd be plus do
+ob name text skip_lemmy to name cmd be plus do
+ob text " PYA_COMMAND_TIMEOUT_MS=28800000 node /home/htaf/pyac/pyash/world/house/owen-sound-reporter/program/run-full-transcript-pipeline.mjs \"" to name cmd be plus do
+ob name text transcript path to name cmd be plus do
+ob text "\" \"" to name cmd be plus do
+ob name text base_prefix to name cmd be plus do
+ob text "\" \"" to name cmd be plus do
+ob name text focus to name cmd be plus do
+ob text "\" \"" to name cmd be plus do
+ob name text jurisdiction to name cmd be plus do
+ob text "\" \"" to name cmd be plus do
+ob name text body to name cmd be plus do
+ob text "\" \"" to name cmd be plus do
+ob name text site_url to name cmd be plus do
+ob text "\" \"" to name cmd be plus do
+ob name text discussion_url to name cmd be plus do
+ob text "\"" to name cmd be plus do
+
+ob text of ob of cmd to name text out be command do
+ob name out be write do

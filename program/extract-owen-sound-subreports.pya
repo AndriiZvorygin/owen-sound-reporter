@@ -1,0 +1,6 @@
+ob filename agenda markdown be input ya
+ob filename output directory be input ya
+ob filename output index be input ya
+ob filename agenda html be input ya
+
+ob text "node /home/htaf/pyac/pyash/world/house/owen-sound-reporter/program/extract-owen-sound-subreports.mjs '${agenda markdown}' '${output directory}' '${output index}' '${agenda html}'" be command do

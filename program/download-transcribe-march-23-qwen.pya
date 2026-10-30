@@ -1,0 +1,19 @@
+exists su name hear backend default ob text "qwen" be default ya
+exists su name hear qwen chunk max seconds ob num 30 be default ya
+exists su name hear qwen chunk overlap seconds ob num 1.5 be default ya
+
+exists su name transcript directory ob filename "/home/htaf/pyac/pyash/world/house/owen-sound-reporter/artifacts/owen-sound/meetings/2026-03-23_council-meeting-regular_f3b0c55c/transcript" be filename ya
+exists su name transcript filename ob filename "/home/htaf/pyac/pyash/world/house/owen-sound-reporter/artifacts/owen-sound/meetings/2026-03-23_council-meeting-regular_f3b0c55c/transcript/meeting-qwen-30s.srt" be filename ya
+
+be directory ob filename of ob of transcript directory do
+be download ob wo all during month 1 from filename "https://video.isilive.ca/owensound/New%20Encoder_CM_2026-03-23-05-31.mp4" as wo audio to filename of ob of transcript directory do
+
+ob text "ls -1t '/home/htaf/pyac/pyash/world/house/owen-sound-reporter/artifacts/owen-sound/meetings/2026-03-23_council-meeting-regular_f3b0c55c/transcript' | head -n 1" to name text audio leaf be command do
+ob text "/home/htaf/pyac/pyash/world/house/owen-sound-reporter/artifacts/owen-sound/meetings/2026-03-23_council-meeting-regular_f3b0c55c/transcript/" to name text audio path be text do
+ob name text audio leaf to name text audio path be plus do
+su name audio filename stage ob name text audio path to name filename audio filename stage be filename do
+
+su name transcript stage from filename of ob of audio filename stage become wo srt to filename of ob of transcript filename be hear do
+
+ob filename of ob of audio filename stage be write do
+ob filename of ob of transcript stage be write do

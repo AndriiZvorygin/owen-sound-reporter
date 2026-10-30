@@ -1,0 +1,11 @@
+exists su name include_speaker_keys ob text "0" be default ya
+exists su name voices_dir ob text "/home/htaf/pyac/pyash/world/voices" be default ya
+
+ob text "PYA_COMMAND_TIMEOUT_MS=7200000 node /home/htaf/pyac/pyash/world/house/owen-sound-reporter/program/refresh-voice-embeddings-from-wav.mjs \"" to name text cmd be text do
+ob name text voices_dir to name cmd be plus do
+ob text "\" \"" to name cmd be plus do
+ob name text include_speaker_keys to name cmd be plus do
+ob text "\"" to name cmd be plus do
+
+ob text of ob of cmd to name text out be command do
+ob name out be write do

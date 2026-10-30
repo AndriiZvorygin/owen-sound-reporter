@@ -1,0 +1,6 @@
+ob filename text be input ya
+ob text "node /home/htaf/pyac/pyash/world/house/owen-sound-reporter/program/backfill-meeting-video-links.mjs \"" to name text cmd be text do
+ob name text input to name cmd be plus do
+ob text "\"" to name cmd be plus do
+ob name cmd to name text out be command do
+ob name out be write do

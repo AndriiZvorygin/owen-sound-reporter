@@ -1,0 +1,13 @@
+exists su name roster_file ob text "/home/htaf/pyac/pyash/world/house/owen-sound-reporter/artifacts/owen-sound/2022-2026-council.txt" be default ya
+ob filename text meeting_dir be input ya
+
+ob name meeting_dir to name text meeting path be text do
+
+ob text "node /home/htaf/pyac/pyash/world/house/owen-sound-reporter/program/augment-roster-from-agenda-in-meeting-folder.mjs \"" to name text cmd be text do
+ob name text meeting path to name cmd be plus do
+ob text "\" \"" to name cmd be plus do
+ob name text roster_file to name cmd be plus do
+ob text "\"" to name cmd be plus do
+
+ob text of ob of cmd to name text out be command do
+ob name out be write do
