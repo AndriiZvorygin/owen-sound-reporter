@@ -48,6 +48,12 @@ lock. That means it starts after the daily poller if necessary, processes one
 oldest outstanding 2026 public meeting, and records output in
 `/home/htaf/pyash/owen-sound-police-backfill.cron.log`.
 
+Only a publish response with `ok: true` and a non-empty post, article, or
+transcript URL counts as complete. Failed, partial, or interrupted attempts
+remain outstanding and are selected again on the next backfill run, so the
+cron keeps working through the archive without treating an error artifact as
+success.
+
 It targets the `owen_sound_police` community and the channel
 `https://www.youtube.com/@owensoundpolice8677/streams`. The wrapper does not
 publish until the shared pipeline has produced a verified transcript payload;
