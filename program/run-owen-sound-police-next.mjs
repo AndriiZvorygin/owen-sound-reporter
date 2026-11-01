@@ -36,6 +36,28 @@ function videoId(value) {
   return /^[A-Za-z0-9_-]{11}$/u.test(text) ? text : (text.match(/[?&]v=([A-Za-z0-9_-]{11})/u)?.[1] || "");
 }
 
+export function isSuccessfulPublishResponse(payload) {
+  return payload?.ok === true
+    && Boolean(String(payload?.post_url || payload?.article_url || payload?.transcript_url || "").trim());
+}
+
+export function dateOnly(value) {
+  const text = String(value || "").trim();
+  const ymd = text.match(/^(\d{4}-\d{2}-\d{2})/u);
+  if (ymd) return ymd[1];
+  const compact = text.match(/^(\d{4})(\d{2})(\d{2})/u);
+  return compact ? `${compact[1]}-${compact[2]}-${compact[3]}` : "";
+}
+
+export function recordingDate(meta) {
+  return dateOnly(meta?.upload_date || meta?.release_date || meta?.timestamp || meta?.release_timestamp || "");
+}
+
+export function isShortPoliceClip(meta, minimumSeconds = 300) {
+  const duration = Number(meta?.duration || 0);
+  return Number.isFinite(duration) && duration > 0 && duration < Number(minimumSeconds || 300);
+}
+
 function alreadyPublished(id) {
   if (!id || !fs.existsSync(MEETINGS_DIR)) return false;
   for (const entry of fs.readdirSync(MEETINGS_DIR, { withFileTypes: true })) {
@@ -47,10 +69,41 @@ function alreadyPublished(id) {
       const transcriptDir = path.join(dir, "transcript");
       const responses = fs.readdirSync(transcriptDir, { withFileTypes: true })
         .filter((file) => file.isFile() && /\.meeting-publish\.response(?:\.attempt-\d+)?\.json$/u.test(file.name));
-      if (responses.length) return true;
+      for (const response of responses) {
+        try {
+          const payload = JSON.parse(fs.readFileSync(path.join(transcriptDir, response.name), "utf8"));
+          if (isSuccessfulPublishResponse(payload)) return true;
+        } catch {}
+      }
     } catch {}
   }
   return false;
+}
+
+function latestPublishedDate() {
+  if (!fs.existsSync(MEETINGS_DIR)) return "";
+  let latest = "";
+  for (const entry of fs.readdirSync(MEETINGS_DIR, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    const dir = path.join(MEETINGS_DIR, entry.name);
+    try {
+      const payloadPath = path.join(dir, "transcript", "meeting-qwen-auto-normalized.lemmy-post.json");
+      const meeting = JSON.parse(fs.readFileSync(path.join(dir, "meeting.json"), "utf8"));
+      const payload = JSON.parse(fs.readFileSync(payloadPath, "utf8"));
+      if (String(payload?.source || "").trim() !== "owen-sound-police") continue;
+      const transcriptDir = path.join(dir, "transcript");
+      const responses = fs.readdirSync(transcriptDir, { withFileTypes: true })
+        .filter((file) => file.isFile() && /\.meeting-publish\.response(?:\.attempt-\d+)?\.json$/u.test(file.name));
+      if (!responses.some((response) => {
+        try {
+          return isSuccessfulPublishResponse(JSON.parse(fs.readFileSync(path.join(transcriptDir, response.name), "utf8")));
+        } catch { return false; }
+      })) continue;
+      const date = dateOnly(payload?.date_iso || meeting?.since || entry.name);
+      if (date && (!latest || date > latest)) latest = date;
+    } catch {}
+  }
+  return latest;
 }
 
 function run(ref) {
@@ -73,12 +126,23 @@ async function main() {
   ]), { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 });
   const listing = JSON.parse(raw || "{}");
   const entries = Array.isArray(listing?.entries) ? listing.entries : [];
+  const minimumSeconds = Number(process.env.OWEN_POLICE_NEXT_MIN_DURATION_SECONDS || 300);
+  const latestDate = latestPublishedDate();
   for (const entry of entries) {
     const id = videoId(entry?.id || entry?.url);
     if (!id || alreadyPublished(id)) continue;
     const url = `https://www.youtube.com/watch?v=${id}`;
     const meta = probe(url);
     if (!meta || !(meta.was_live === true || /^(?:was_live|post_live)$/iu.test(String(meta.live_status || "")))) continue;
+    if (isShortPoliceClip(meta, minimumSeconds)) {
+      process.stdout.write(`[owen-police-next] skip short recording ${id}: ${Number(meta.duration || 0)}s < ${minimumSeconds}s\n`);
+      continue;
+    }
+    const candidateDate = recordingDate(meta);
+    if (latestDate && candidateDate && candidateDate < latestDate) {
+      process.stdout.write(`[owen-police-next] skip stale recording ${id}: ${candidateDate} < latest published ${latestDate}\n`);
+      continue;
+    }
     process.stdout.write(`[owen-police-next] selected ${id}: ${String(meta.title || entry?.title || "OSPSB recording")}\n`);
     await run(url);
     return;
@@ -86,8 +150,11 @@ async function main() {
   process.stdout.write("[owen-police-next] no unposted Police Services Board recording found\n");
 }
 
-main().catch((err) => {
-  process.stderr.write(`${String(err?.stack || err?.message || err)}\n`);
-  process.exit(1);
-});
+const invokedPath = process.argv[1] ? path.resolve(process.argv[1]) : "";
+if (import.meta.url === `file://${invokedPath}`) {
+  main().catch((err) => {
+    process.stderr.write(`${String(err?.stack || err?.message || err)}\n`);
+    process.exit(1);
+  });
+}
 
