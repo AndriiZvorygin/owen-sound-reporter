@@ -7,7 +7,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { spawn } from "node:child_process";
 import { execFileSync } from "node:child_process";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const PROGRAM_DIR = path.dirname(fileURLToPath(import.meta.url));
 const OWEN_ROOT = path.resolve(PROGRAM_DIR, "..");
@@ -73,11 +73,40 @@ function sourceDate(payloadPath) {
   }
 }
 
+function slugify(value) {
+  return String(value || "")
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/gu, "")
+    .replace(/[^a-z0-9]+/gu, "-")
+    .replace(/^-+|-+$/gu, "") || "unknown";
+}
+
+export function canonicalTranscriptUrl(payload, siteUrl = process.env.MEETING_PUBLISH_SITE_URL || "https://helpos.ca") {
+  const jurisdiction = slugify(payload?.jurisdiction || "Owen Sound Police");
+  const route = slugify(payload?.meeting_route_slug || payload?.topic || "police-board");
+  const date = String(payload?.date_iso || "").trim();
+  return `${String(siteUrl || "https://helpos.ca").replace(/\/+$/u, "")}/transcripts/${jurisdiction}/${route}/${date}`;
+}
+
 function ensureMeetingRouteSlug(payloadPath) {
   const payload = JSON.parse(fs.readFileSync(payloadPath, "utf8"));
   const route = String(payload?.meeting_route_slug || payload?.topic || "police-board").trim() || "police-board";
-  if (payload.meeting_route_slug === route) return;
+  const canonical = canonicalTranscriptUrl({ ...payload, meeting_route_slug: route });
   payload.meeting_route_slug = route;
+  payload.transcript_url = canonical;
+  const htmlPathRaw = String(payload?.local_transcript_html || "").trim();
+  const htmlPath = htmlPathRaw
+    ? (path.isAbsolute(htmlPathRaw) ? htmlPathRaw : path.resolve(path.dirname(payloadPath), htmlPathRaw))
+    : "";
+  if (htmlPath && fs.existsSync(htmlPath)) {
+    const html = fs.readFileSync(htmlPath, "utf8");
+    const rewritten = html.replace(
+      /(<link\s+rel=["']canonical["']\s+href=["'])[^"']+(["'])/iu,
+      `$1${canonical}$2`,
+    );
+    if (rewritten !== html) fs.writeFileSync(htmlPath, rewritten, "utf8");
+  }
   fs.writeFileSync(payloadPath, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
 }
 
@@ -125,7 +154,10 @@ async function main() {
   process.stdout.write(`[owen-police] done: video=${id} date=${dateIso} payload=${payloadPath}\n`);
 }
 
-main().catch((err) => {
-  process.stderr.write(`${String(err?.stack || err?.message || err)}\n`);
-  process.exit(1);
-});
+const invokedPath = process.argv[1] ? pathToFileURL(path.resolve(process.argv[1])).href : "";
+if (import.meta.url === invokedPath) {
+  main().catch((err) => {
+    process.stderr.write(`${String(err?.stack || err?.message || err)}\n`);
+    process.exit(1);
+  });
+}

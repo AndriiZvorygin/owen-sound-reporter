@@ -12,6 +12,7 @@ import {
   isBackfillDateEligible,
   recordingDate as backfillRecordingDate,
 } from "../run-owen-sound-police-backfill-2026.mjs";
+import { canonicalTranscriptUrl } from "../run-owen-sound-police-from-ref.mjs";
 
 test("police cron owns one managed block without an outer flock", () => {
   const existing = [
@@ -57,4 +58,15 @@ test("police archive backfill accepts pre-2026 and newer dates", () => {
   assert.equal(isBackfillDateEligible("2027-01-01"), true);
   assert.equal(isBackfillDateEligible("2019-12-31", { startDate: "2020-01-01" }), false);
   assert.equal(isBackfillDateEligible("2027-01-01", { endDate: "2026-12-31" }), false);
+});
+
+test("police publisher canonical URL omits video-id suffixes", () => {
+  assert.equal(
+    canonicalTranscriptUrl({
+      jurisdiction: "Owen Sound Police",
+      meeting_route_slug: "police-board",
+      date_iso: "2026-06-24",
+    }),
+    "https://helpos.ca/transcripts/owen-sound-police/police-board/2026-06-24",
+  );
 });
