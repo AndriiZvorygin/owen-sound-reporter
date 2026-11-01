@@ -8,6 +8,10 @@ import {
   isSuccessfulPublishResponse,
   recordingDate,
 } from "../run-owen-sound-police-next.mjs";
+import {
+  isBackfillDateEligible,
+  recordingDate as backfillRecordingDate,
+} from "../run-owen-sound-police-backfill-2026.mjs";
 
 test("police cron owns one managed block without an outer flock", () => {
   const existing = [
@@ -44,4 +48,13 @@ test("police next filters short clips and compares recording dates", () => {
   assert.equal(isShortPoliceClip({ duration: 3357 }), false);
   assert.equal(recordingDate({ upload_date: "20261021" }), "2026-10-21");
   assert.equal(dateOnly("2026-10-20T12:00:00"), "2026-10-20");
+});
+
+test("police archive backfill accepts pre-2026 and newer dates", () => {
+  assert.equal(backfillRecordingDate({ upload_date: "20191231" }), "2019-12-31");
+  assert.equal(backfillRecordingDate({ upload_date: "2019-12-31" }), "2019-12-31");
+  assert.equal(isBackfillDateEligible("2019-12-31"), true);
+  assert.equal(isBackfillDateEligible("2027-01-01"), true);
+  assert.equal(isBackfillDateEligible("2019-12-31", { startDate: "2020-01-01" }), false);
+  assert.equal(isBackfillDateEligible("2027-01-01", { endDate: "2026-12-31" }), false);
 });

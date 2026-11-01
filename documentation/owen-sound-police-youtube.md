@@ -29,23 +29,28 @@ agenda-pin jobs) and records output in
 `/home/htaf/pyash/owen-sound-police.cron.log`.
 
 The daily poller owns the single-flight lock and processes at most one
-recording. Do not wrap it in a second `flock` command. A 2026 archive backfill
-is available separately:
+recording. Do not wrap it in a second `flock` command. An archive backfill is
+available separately (the `-2026` filename is retained for compatibility):
 
 ```sh
 ./run-backfill-police-2026.sh
 ```
 
-Backfill is oldest-first and bounded to one public recording per invocation by
-default. It skips already-published recordings, closed sessions, and clips
-shorter than five minutes. Set `OWEN_POLICE_BACKFILL_LIMIT` to process more
-than one, or `OWEN_POLICE_BACKFILL_DRY_RUN=1` to inspect the next selection.
-Use `OWEN_POLICE_MIN_DURATION_SEC=0` or
+Backfill is oldest-first across the entire channel archive, including dates
+before 2026 and newer dates added later, and is bounded to one public recording
+per invocation by default. It skips already-published recordings, closed
+sessions, and clips shorter than five minutes. Set
+`OWEN_POLICE_BACKFILL_LIMIT` to process more than one, or
+`OWEN_POLICE_BACKFILL_DRY_RUN=1` to inspect the next selection. Set
+`OWEN_POLICE_BACKFILL_START_DATE` and/or `OWEN_POLICE_BACKFILL_END_DATE` for a
+bounded historical window. Set `OWEN_POLICE_BACKFILL_PLAYLIST_END` only when a
+bounded channel listing is intentional; by default the discovery scans the
+full available archive. Use `OWEN_POLICE_MIN_DURATION_SEC=0` or
 `OWEN_POLICE_INCLUDE_CLOSED=1` only when a specific exception is intended.
 
 The installed backfill cron runs at 05:40 with a twelve-hour wait on the same
 lock. That means it starts after the daily poller if necessary, processes one
-oldest outstanding 2026 public meeting, and records output in
+oldest outstanding public meeting, and records output in
 `/home/htaf/pyash/owen-sound-police-backfill.cron.log`.
 
 Only a publish response with `ok: true` and a non-empty post, article, or

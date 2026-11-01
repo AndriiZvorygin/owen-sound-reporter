@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-// Discover and process older 2026 Police Services Board recordings.  This is
+// Discover and process archived Police Services Board recordings. This is
 // deliberately separate from the daily poller: backfill is oldest-first,
 // bounded to one recording by default, and skips short/closed-session items
 // that are not useful public transcripts. Failed or incomplete publish
@@ -10,7 +10,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
 import { spawn } from "node:child_process";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { isSuccessfulPublishResponse } from "./shared/police-publish-state.mjs";
 
 const PROGRAM_DIR = path.dirname(fileURLToPath(import.meta.url));
@@ -22,6 +22,8 @@ const EXTRACTOR_ARGS = String(process.env.ANDRII_YTDLP_EXTRACTOR_ARGS || "youtub
 const MIN_DURATION_SECONDS = Math.max(0, Number(process.env.OWEN_POLICE_MIN_DURATION_SEC || 300) || 0);
 const INCLUDE_CLOSED = /^(1|true|yes)$/iu.test(String(process.env.OWEN_POLICE_INCLUDE_CLOSED || "0"));
 const LIMIT = Math.max(1, Number(process.env.OWEN_POLICE_BACKFILL_LIMIT || 1) || 1);
+const START_DATE = String(process.env.OWEN_POLICE_BACKFILL_START_DATE || "").trim();
+const END_DATE = String(process.env.OWEN_POLICE_BACKFILL_END_DATE || "").trim();
 
 function ytdlpArgs(args) {
   return EXTRACTOR_ARGS ? [...args, "--extractor-args", EXTRACTOR_ARGS] : [...args];
@@ -32,7 +34,7 @@ function videoId(value) {
   return /^[A-Za-z0-9_-]{11}$/u.test(text) ? text : (text.match(/[?&]v=([A-Za-z0-9_-]{11})/u)?.[1] || "");
 }
 
-function recordingDate(meta) {
+export function recordingDate(meta) {
   for (const key of ["release_timestamp", "timestamp"]) {
     const seconds = Number(meta?.[key]);
     if (Number.isFinite(seconds) && seconds > 0) return new Date(seconds * 1000).toISOString().slice(0, 10);
@@ -40,9 +42,16 @@ function recordingDate(meta) {
   for (const key of ["upload_date", "release_date", "date"]) {
     const value = String(meta?.[key] || "").trim();
     if (/^\d{8}$/u.test(value)) return `${value.slice(0, 4)}-${value.slice(4, 6)}-${value.slice(6)}`;
-    if (/^202\d-\d{2}-\d{2}$/u.test(value)) return value;
+    if (/^\d{4}-\d{2}-\d{2}$/u.test(value)) return value;
   }
   return "";
+}
+
+export function isBackfillDateEligible(date, { startDate = "", endDate = "" } = {}) {
+  if (!/^\d{4}-\d{2}-\d{2}$/u.test(String(date || ""))) return false;
+  if (/^\d{4}-\d{2}-\d{2}$/u.test(String(startDate || "")) && date < startDate) return false;
+  if (/^\d{4}-\d{2}-\d{2}$/u.test(String(endDate || "")) && date > endDate) return false;
+  return true;
 }
 
 function probe(ref) {
@@ -99,10 +108,19 @@ function run(ref) {
 }
 
 async function main() {
-  const raw = execFileSync("yt-dlp", ytdlpArgs([
+  const args = [
     "--quiet", "--ignore-errors", "--dump-single-json", "--flat-playlist",
-    "--playlist-end", String(process.env.OWEN_POLICE_BACKFILL_PLAYLIST_END || 40), CHANNEL,
-  ]), { encoding: "utf8", maxBuffer: 128 * 1024 * 1024, timeout: 120_000 });
+  ];
+  const playlistEnd = Number(process.env.OWEN_POLICE_BACKFILL_PLAYLIST_END || 0);
+  if (Number.isFinite(playlistEnd) && playlistEnd > 0) {
+    args.push("--playlist-end", String(Math.floor(playlistEnd)));
+  }
+  args.push(CHANNEL);
+  const raw = execFileSync("yt-dlp", ytdlpArgs(args), {
+    encoding: "utf8",
+    maxBuffer: 128 * 1024 * 1024,
+    timeout: Math.max(120_000, Number(process.env.OWEN_POLICE_BACKFILL_DISCOVERY_TIMEOUT_MS || 300_000) || 300_000),
+  });
   const listing = JSON.parse(raw || "{}");
   const entries = Array.isArray(listing?.entries) ? listing.entries : [];
   const candidates = [];
@@ -113,10 +131,7 @@ async function main() {
     const meta = probe(url);
     if (!meta) continue;
     const date = recordingDate(meta);
-    // The channel listing is newest-first. Once a usable date crosses into
-    // 2025 (or earlier), no later entry can belong to the 2026 backfill.
-    if (date && date < "2026-01-01") break;
-    if (!date.startsWith("2026-")) continue;
+    if (!isBackfillDateEligible(date, { startDate: START_DATE, endDate: END_DATE })) continue;
     if (!(meta.was_live === true || /^(?:was_live|post_live)$/iu.test(String(meta.live_status || "")))) continue;
     const duration = Number(meta.duration || 0) || 0;
     const title = String(meta.title || entry?.title || "OSPSB recording");
@@ -133,7 +148,7 @@ async function main() {
   candidates.sort((a, b) => a.date.localeCompare(b.date) || a.timestamp - b.timestamp || a.id.localeCompare(b.id));
   const selected = candidates.slice(0, LIMIT);
   if (!selected.length) {
-    process.stdout.write("[owen-police-backfill] no unpublished 2026 public-session recording found\n");
+    process.stdout.write("[owen-police-backfill] no unpublished public-session recording found\n");
     return;
   }
   for (const item of selected) {
@@ -143,7 +158,10 @@ async function main() {
   }
 }
 
-main().catch((err) => {
-  process.stderr.write(`${String(err?.stack || err?.message || err)}\n`);
-  process.exit(1);
-});
+const invokedPath = process.argv[1] ? pathToFileURL(path.resolve(process.argv[1])).href : "";
+if (import.meta.url === invokedPath) {
+  main().catch((err) => {
+    process.stderr.write(`${String(err?.stack || err?.message || err)}\n`);
+    process.exit(1);
+  });
+}
