@@ -3,12 +3,15 @@
 // Discover and process older 2026 Police Services Board recordings.  This is
 // deliberately separate from the daily poller: backfill is oldest-first,
 // bounded to one recording by default, and skips short/closed-session items
-// that are not useful public transcripts.
+// that are not useful public transcripts. Failed or incomplete publish
+// responses remain eligible on the next scheduled run until a real URL-backed
+// success is recorded.
 import fs from "node:fs";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { isSuccessfulPublishResponse } from "./shared/police-publish-state.mjs";
 
 const PROGRAM_DIR = path.dirname(fileURLToPath(import.meta.url));
 const OWEN_ROOT = path.resolve(PROGRAM_DIR, "..");
@@ -70,7 +73,12 @@ function alreadyPublished(id) {
       const transcriptDir = path.join(dir, "transcript");
       const responses = fs.readdirSync(transcriptDir, { withFileTypes: true })
         .filter((file) => file.isFile() && /\.meeting-publish\.response(?:\.attempt-\d+)?\.json$/u.test(file.name));
-      if (responses.length) return true;
+      for (const response of responses) {
+        try {
+          const payload = JSON.parse(fs.readFileSync(path.join(transcriptDir, response.name), "utf8"));
+          if (isSuccessfulPublishResponse(payload)) return true;
+        } catch {}
+      }
     } catch {}
   }
   return false;

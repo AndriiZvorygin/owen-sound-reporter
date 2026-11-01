@@ -8,6 +8,7 @@ import path from "node:path";
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { spawn } from "node:child_process";
+import { isSuccessfulPublishResponse } from "./shared/police-publish-state.mjs";
 
 const PROGRAM_DIR = path.dirname(fileURLToPath(import.meta.url));
 const OWEN_ROOT = path.resolve(PROGRAM_DIR, "..");
@@ -36,10 +37,7 @@ function videoId(value) {
   return /^[A-Za-z0-9_-]{11}$/u.test(text) ? text : (text.match(/[?&]v=([A-Za-z0-9_-]{11})/u)?.[1] || "");
 }
 
-export function isSuccessfulPublishResponse(payload) {
-  return payload?.ok === true
-    && Boolean(String(payload?.post_url || payload?.article_url || payload?.transcript_url || "").trim());
-}
+export { isSuccessfulPublishResponse };
 
 export function dateOnly(value) {
   const text = String(value || "").trim();
